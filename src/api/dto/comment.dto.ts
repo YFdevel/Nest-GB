@@ -1,7 +1,28 @@
+import {
+  IsArray,
+  IsDate,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
+
 export class Comment {
-  id!: number|null;
+  @ValidateIf((o) => o.id)
+  @IsPositive()
+  @IsInt()
+  id!: number | null;
 
-  text!: string|null;
+  @ValidateIf((o) => o.text)
+  @IsString()
+  text!: string | null;
 
-  createdAt!: Date|null;
+  @ValidateIf((o) => o.createdAt)
+  @IsDate()
+  createdAt!: Date | null;
+
+  @ValidateIf((o) => o.avatar)
+  @IsString()
+  avatar!:string | null;
 }

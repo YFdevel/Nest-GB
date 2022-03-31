@@ -16,7 +16,18 @@ export const newsTemplateOne = (post: Posts) => {
     </h6>
     <p class="card-text">${post.description}</p>
     </div>
-    ${templateComments(post.comments)}</div>
+    ${templateComments(post.comments)}
+    <iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe"></iframe>
+    <form class="upload-form" method="post" enctype="multipart/form-data" target="dummyframe"
+    action="http://127.0.0.1:3000/comments/upload?id=${post.id}">
+    <p>Создайте комментарий</p>
+    <textarea name="text" class="textarea"></textarea>
+    <label for="file" class="label">Загрузить аватарку</label>
+    <input type="file" id ="file" name="file"/><br>
+    <button type="submit">Создать</button>
+    </form>
+    </div>
+  
     `;
 
   return html;

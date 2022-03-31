@@ -10,6 +10,9 @@ export const templateComments = (comments: Comment[]) => {
   for (const commentItem of comments) {
     html += `
     <div class="comment-item">
+    <div class="card-img">
+    <img src="http://localhost:3000/uploads/${commentItem?.avatar}">
+    </div>
     <p class="card-text">${commentItem.text}</p>
     <h6 class="card-subtitle mb-2 text-muted"> Дата создания: ${commentItem.createdAt}</h6>
     </div>

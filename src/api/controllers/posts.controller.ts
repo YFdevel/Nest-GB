@@ -3,19 +3,32 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Post,
   Put,
-  Query
+  Query,
+  Render,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { PostsService } from '../modules/posts/posts.service';
+import { PostsService } from '../../modules/posts/posts.service';
 import { Posts } from '../dto/post.dto';
-import { htmlTemplate } from '../../views/template';
-import { newsTemplate } from '../../views/template-post';
+import { htmlTemplate } from '../../templates/template';
+import { newsTemplate } from '../../templates/template-post';
 import { DecrementQueryId } from '../../utils/decrement-query-id.decorator';
 import { DecrementBodyId } from '../../utils/decrement-body-id.decorator';
-import { newsTemplateOne } from '../../views/template-one';
+import { newsTemplateOne } from '../../templates/template-one';
 import { DecrementParamId } from '../../utils/decrement-param-id.decorator';
+import { ParamIdDto } from '../dto/param-id.dto';
+import { isInt16Array } from 'util/types';
+import { IsInt, IsNumberString } from 'class-validator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { extname, join } from 'path';
+import { Response, Express } from 'express';
+import { createReadStream } from 'fs';
+import { diskStorage, Multer } from 'multer';
 
 @Controller('posts')
 export class PostsController {
@@ -25,11 +38,17 @@ export class PostsController {
   async getPosts(): Promise<Posts[]> {
     return this.appService.getPosts();
   }
+  @Get('say-hello')
+  @Render('index')
+  sayHello(): { message: string } {
+    return { message: 'Привет!!!' };
+  }
 
   @Get('get-one')
-  async getPost(@Query() @DecrementQueryId(['id']) query: { id: number }): Promise<Posts> {
-   return this.appService.getPost(query.id);
-   
+  async getPost(
+    @Query() @DecrementQueryId(['id']) query: ParamIdDto,
+  ): Promise<Posts> {
+    return this.appService.getPost(query.id);
   }
 
   @Post('create')
@@ -38,12 +57,16 @@ export class PostsController {
   }
 
   @Delete('delete')
-  async deletePost(@Body() @DecrementBodyId(['id']) body: { id: number }): Promise<Posts[]> {
+  async deletePost(
+    @Body() @DecrementBodyId(['id']) body: ParamIdDto,
+  ): Promise<Posts[]> {
     return this.appService.deletePost(body.id);
   }
 
   @Put('update')
-  async updatePost(@Body() @DecrementBodyId(['id']) data: Posts): Promise<Posts> {
+  async updatePost(
+    @Body() @DecrementBodyId(['id']) data: Posts,
+  ): Promise<Posts> {
     return this.appService.updatePost(data);
   }
 
@@ -54,8 +77,18 @@ export class PostsController {
   }
 
   @Get('/:id/detail')
-  async getPostDetails(@Param('id') @DecrementParamId(['id']) id: number ): Promise<String> {
-    const post=await this.appService.getPost(id);
+  async getPostDetails(
+    @Param() @DecrementParamId(['id']) params: ParamIdDto,
+  ): Promise<String> {
+    const post = await this.appService.getPost(params.id);
     return htmlTemplate(newsTemplateOne(post));
   }
+
+
+  @Get('file')
+  getFile(@Res() res: Response) {
+    const file = createReadStream(join(process.cwd(), '/media/pexels.jpg'));
+    file.pipe(res);
+  }
+
 }
